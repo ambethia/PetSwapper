@@ -1,0 +1,15 @@
+## Interface: 50400
+## Title: Pet Swapper
+## Author: Jason L Perry
+## Version: @project-version@
+## Notes: Auto swapping for battle pet leveling
+## X-Website: http://ambethia.com/
+## X-Email: jasper@ambethia.com
+## X-Category: Pet Battles
+
+## SavedVariables: PetSwapperDB
+
+PetSwapper.lua
+
+tekKonfig\tekKonfig.xml
+Config.lua
