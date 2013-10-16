@@ -1,4 +1,4 @@
-local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
+local frame = CreateFrame("Frame", "PSConfig", InterfaceOptionsFramePanelContainer)
 frame.name = "Pet Swapper"
 frame:Hide()
 
@@ -40,7 +40,7 @@ frame:SetScript("OnShow", function(self)
     PetSwapperDB.swapMax = swapMax:GetValue()
   end)
   
-  local slotOne = tekcheck.new(self, nil, "Swap pets in slot one", "TOPLEFT", swapMin, "BOTTOMLEFT", -2, -GAP * 2)
+  local slotOne = tekcheck.new(self, nil, "Auto-swap pets in slot one", "TOPLEFT", swapMin, "BOTTOMLEFT", -2, -GAP * 2)
   slotOne.tiptext = "Enable or disable swapping of pets in slot one."
   slotOne:SetChecked(PetSwapperDB.slotOne)
   local checksound = slotOne:GetScript("OnClick")
@@ -49,7 +49,7 @@ frame:SetScript("OnShow", function(self)
     PetSwapperDB.slotOne = not PetSwapperDB.slotOne
   end)
   
-  local slotTwo = tekcheck.new(self, nil, "Swap pets in slot two", "TOPLEFT", slotOne, "BOTTOMLEFT", -2, -GAP)
+  local slotTwo = tekcheck.new(self, nil, "Auto-swap pets in slot two", "TOPLEFT", slotOne, "BOTTOMLEFT", -2, -GAP)
   slotTwo.tiptext = "Enable or disable swapping of pets in slot two."
   slotTwo:SetChecked(PetSwapperDB.slotTwo)
   local checksound = slotTwo:GetScript("OnClick")
@@ -58,7 +58,7 @@ frame:SetScript("OnShow", function(self)
     PetSwapperDB.slotTwo = not PetSwapperDB.slotTwo
   end)
   
-  local slotThree = tekcheck.new(self, nil, "Swap pets in slot three", "TOPLEFT", slotTwo, "BOTTOMLEFT", -2, -GAP)
+  local slotThree = tekcheck.new(self, nil, "Auto-swap pets in slot three", "TOPLEFT", slotTwo, "BOTTOMLEFT", -2, -GAP)
   slotThree.tiptext = "Enable or disable swapping of pets in slot three."
   slotThree:SetChecked(PetSwapperDB.slotThree)
   local checksound = slotThree:GetScript("OnClick")
@@ -66,7 +66,120 @@ frame:SetScript("OnShow", function(self)
     checksound(self)
     PetSwapperDB.slotThree = not PetSwapperDB.slotThree
   end)
+
+  function labelForPet(customName, speciesName, level)
+    if customName then
+      return customName .. " (" .. level .. " " .. speciesName ..")"
+    else
+      return speciesName .. " (" .. level ..")"
+    end
+  end
+
+  local slotOneDropDown = CreateFrame("FRAME", "PSConfigSlotOneFixDropDown", self, "UIDropDownMenuTemplate")
+  slotOneDropDown:SetPoint("LEFT", slotOne, "RIGHT", 200, 0)
+
+  function slotOneDropDown:SetValue(newValue, label)
+    PetSwapperDB.slotOneFix = newValue
+    UIDropDownMenu_SetSelectedValue(slotOneDropDown, newValue)
+    UIDropDownMenu_SetText(slotOneDropDown, label)
+  end
+  UIDropDownMenu_SetWidth(slotOneDropDown, 200)
+  UIDropDownMenu_SetText(slotOneDropDown, "Choose pet for slot one...")
+  UIDropDownMenu_Initialize(slotOneDropDown, function(self, level, menuList)
+    local selected, info = UIDropDownMenu_GetSelectedValue(slotOneDropDown) or PetSwapperDB.slotOneFix, UIDropDownMenu_CreateInfo()    
+    info.text = "None..."
+    info.value = nil
+    info.arg1 = nil
+    info.arg2 = "None..."
+    info.checked = selected == nil
+    info.func = self.SetValue
+    UIDropDownMenu_AddButton(info)
+    for index = 1, select(2, C_PetJournal.GetNumPets()) do
+      local petGUID, _, _, customName, level, favorite, _, speciesName = C_PetJournal.GetPetInfoByIndex(index)
+      local label = labelForPet(customName, speciesName, level)
+      if petGUID == selected then UIDropDownMenu_SetText(slotOneDropDown, label) end
+      if favorite and level == 25 then
+        info.text = label
+        info.value = petGUID
+        info.arg1 = petGUID
+        info.arg2 = label
+        info.checked = petGUID == selected
+        info.func = self.SetValue
+        UIDropDownMenu_AddButton(info)
+      end
+    end
+  end)
   
+  local slotTwoDropDown = CreateFrame("FRAME", "PSConfigSlotTwoFixDropDown", self, "UIDropDownMenuTemplate")
+  slotTwoDropDown:SetPoint("LEFT", slotTwo, "RIGHT", 200, 0)
+
+  function slotTwoDropDown:SetValue(newValue, label)
+    PetSwapperDB.slotTwoFix = newValue
+    UIDropDownMenu_SetSelectedValue(slotTwoDropDown, newValue)
+    UIDropDownMenu_SetText(slotTwoDropDown, label)
+  end
+  UIDropDownMenu_SetWidth(slotTwoDropDown, 200)
+  UIDropDownMenu_SetText(slotTwoDropDown, "Choose pet for slot two...")
+  UIDropDownMenu_Initialize(slotTwoDropDown, function(self, level, menuList)
+    local selected, info = UIDropDownMenu_GetSelectedValue(slotTwoDropDown) or PetSwapperDB.slotTwoFix, UIDropDownMenu_CreateInfo()    
+    info.text = "None..."
+    info.value = nil
+    info.arg1 = nil
+    info.arg2 = "None..."
+    info.checked = selected == nil
+    info.func = self.SetValue
+    UIDropDownMenu_AddButton(info)
+    for index = 1, select(2, C_PetJournal.GetNumPets()) do
+      local petGUID, _, _, customName, level, favorite, _, speciesName = C_PetJournal.GetPetInfoByIndex(index)
+      local label = labelForPet(customName, speciesName, level)
+      if petGUID == selected then UIDropDownMenu_SetText(slotTwoDropDown, label) end
+      if favorite and level == 25 then
+        info.text = label
+        info.value = petGUID
+        info.arg1 = petGUID
+        info.arg2 = label
+        info.checked = petGUID == selected
+        info.func = self.SetValue
+        UIDropDownMenu_AddButton(info)
+      end
+    end
+  end)
+  
+  local slotThreeDropDown = CreateFrame("FRAME", "PSConfigSlotThreeFixDropDown", self, "UIDropDownMenuTemplate")
+  slotThreeDropDown:SetPoint("LEFT", slotThree, "RIGHT", 200, 0)
+
+  function slotThreeDropDown:SetValue(newValue, label)
+    PetSwapperDB.slotThreeFix = newValue
+    UIDropDownMenu_SetSelectedValue(slotThreeDropDown, newValue)
+    UIDropDownMenu_SetText(slotThreeDropDown, label)
+  end
+  UIDropDownMenu_SetWidth(slotThreeDropDown, 200)
+  UIDropDownMenu_SetText(slotThreeDropDown, "Choose pet for slot three...")
+  UIDropDownMenu_Initialize(slotThreeDropDown, function(self, level, menuList)
+    local selected, info = UIDropDownMenu_GetSelectedValue(slotThreeDropDown) or PetSwapperDB.slotThreeFix, UIDropDownMenu_CreateInfo()    
+    info.text = "None..."
+    info.value = nil
+    info.arg1 = nil
+    info.arg2 = "None..."
+    info.checked = selected == nil
+    info.func = self.SetValue
+    UIDropDownMenu_AddButton(info)
+    for index = 1, select(2, C_PetJournal.GetNumPets()) do
+      local petGUID, _, _, customName, level, favorite, _, speciesName = C_PetJournal.GetPetInfoByIndex(index)
+      local label = labelForPet(customName, speciesName, level)
+      if petGUID == selected then UIDropDownMenu_SetText(slotThreeDropDown, label) end
+      if favorite and level == 25 then
+        info.text = label
+        info.value = petGUID
+        info.arg1 = petGUID
+        info.arg2 = label
+        info.checked = petGUID == selected
+        info.func = self.SetValue
+        UIDropDownMenu_AddButton(info)
+      end
+    end
+  end)
+
   self:SetScript("OnShow", nil)
 end)
 

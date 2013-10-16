@@ -1,10 +1,13 @@
 local defaults, db = {
-  isEnabled     = true,
-  swapMin    = 1,
-  swapMax    = 25,
-  slotOne    = true,
-  slotTwo    = true,
-  slotThree  = false
+  isEnabled    = true,
+  swapMin      = 1,
+  swapMax      = 25,
+  slotOne      = true,
+  slotTwo      = true,
+  slotThree    = false,
+  slotOneFix   = nil,
+  slotTwoFix   = nil,
+  slotThreeFix = nil,
 }
 
 local frame, swapping = CreateFrame("Frame"), false
@@ -59,6 +62,9 @@ function frame:PET_JOURNAL_LIST_UPDATE()
         end
       end
     end
+    if not db.slotOne   and db.slotOneFix   then C_PetJournal.SetPetLoadOutInfo(1, db.slotOneFix)   end
+    if not db.slotTwo   and db.slotTwoFix   then C_PetJournal.SetPetLoadOutInfo(2, db.slotTwoFix)   end
+    if not db.slotThree and db.slotThreeFix then C_PetJournal.SetPetLoadOutInfo(3, db.slotThreeFix) end
     swapping = false
   end
 end
